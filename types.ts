@@ -9,6 +9,13 @@ export type ScreenName =
   | 'progress'
   | 'profile';
 
+export interface ExamSettings {
+  subjects: string[];
+  targetScore: string;
+  subjectScores: Record<string, string>;
+  year: string;
+}
+
 export interface User {
   name: string;
   avatar: string;
@@ -16,6 +23,7 @@ export interface User {
   xp: number;
   coins: number;
   streak: number;
+  examSettings?: ExamSettings;
 }
 
 export interface Question {
@@ -43,4 +51,36 @@ export interface StatPoint {
 export interface WeeklyProgress {
   day: string;
   xp: number;
+}
+
+export interface Mission {
+  mission_id: string;
+  title: string;
+  description: string;
+  topic: string;
+  difficulty: 'easy' | 'medium' | 'hard';
+  estimated_time_min: number;
+  xp_reward: number;
+  problem_type: 'multiple_choice' | 'short_answer' | 'open_ended';
+  problem_statement: string;
+  choices?: string[];
+  correct_answer: string;
+  explanation: string;
+  hints: string[];
+  metadata: {
+    grade_or_level: string;
+    target_exam: string;
+    tags: string[];
+  };
+}
+
+export interface DailyQuest {
+  quest_id: string;
+  title: string;
+  description: string;
+  estimated_total_time_min: number;
+  recommended_order: string;
+  xp_reward_total: number;
+  streak_hint: string;
+  missions: Mission[];
 }

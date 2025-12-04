@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { MobileLayout, BottomNav } from './components/UIComponents';
+import { AppLayout } from './components/UIComponents';
 import { Onboarding, LoginRegister, ExamPreferences } from './screens/AuthScreens';
 import { HomeDashboard, ProfileScreen } from './screens/Dashboard';
 import { DailyTraining, AITutor, TestSimulation } from './screens/ActiveLearning';
 import { ProgressScreen } from './screens/Progress';
-import { ScreenName, User } from './types';
+import { ScreenName, User, ExamSettings } from './types';
 
 const MOCK_USER: User = {
   name: 'Т. Болд',
@@ -17,6 +17,16 @@ const MOCK_USER: User = {
 
 const App: React.FC = () => {
   const [currentScreen, setCurrentScreen] = useState<ScreenName>('onboarding');
+  const [examSettings, setExamSettings] = useState<ExamSettings | null>(null);
+
+  const handleSaveSettings = (settings: ExamSettings) => {
+    setExamSettings(settings);
+    setCurrentScreen('home');
+  };
+
+  const userWithSettings = { ...MOCK_USER, examSettings: examSettings || undefined };
+
+  const isAuthScreen = ['onboarding', 'auth', 'examPreferences'].includes(currentScreen);
 
   // Simple router logic
   const renderScreen = () => {
@@ -26,39 +36,34 @@ const App: React.FC = () => {
       case 'auth':
         return <LoginRegister onNavigate={setCurrentScreen} />;
       case 'examPreferences':
-        return <ExamPreferences onNavigate={setCurrentScreen} />;
+        return <ExamPreferences onNavigate={setCurrentScreen} onSave={handleSaveSettings} />;
       case 'home':
-        return <HomeDashboard user={MOCK_USER} onNavigate={setCurrentScreen} />;
+        return <HomeDashboard user={userWithSettings} onNavigate={setCurrentScreen} />;
       case 'dailyTraining':
-        return <DailyTraining onBack={() => setCurrentScreen('home')} />;
+        return <DailyTraining user={userWithSettings} onBack={() => setCurrentScreen('home')} />;
       case 'aiTutor':
-        return <AITutor onBack={() => setCurrentScreen('home')} />;
+        return <AITutor onBack={() => setCurrentScreen('home')} examSettings={examSettings} />;
       case 'testSimulation':
         return <TestSimulation onBack={() => setCurrentScreen('home')} />;
       case 'progress':
-        return <ProgressScreen user={MOCK_USER} onBack={() => setCurrentScreen('home')} />;
+        return <ProgressScreen user={userWithSettings} onBack={() => setCurrentScreen('home')} />;
       case 'profile':
-        return <ProfileScreen user={MOCK_USER} />;
+        return <ProfileScreen user={userWithSettings} />;
       default:
-        return <HomeDashboard user={MOCK_USER} onNavigate={setCurrentScreen} />;
+        return <HomeDashboard user={userWithSettings} onNavigate={setCurrentScreen} />;
     }
   };
 
-  const showBottomNav = ['home', 'progress', 'profile'].includes(currentScreen);
-
   return (
-    <MobileLayout>
+    <AppLayout 
+      currentScreen={currentScreen} 
+      onNavigate={setCurrentScreen}
+      showNav={!isAuthScreen}
+    >
       <div className="flex-1 flex flex-col h-full overflow-hidden">
         {renderScreen()}
       </div>
-      
-      {showBottomNav && (
-        <BottomNav 
-          currentScreen={currentScreen} 
-          onNavigate={setCurrentScreen} 
-        />
-      )}
-    </MobileLayout>
+    </AppLayout>
   );
 };
 
